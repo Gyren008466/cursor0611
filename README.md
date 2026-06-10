@@ -85,6 +85,9 @@ functions/api/[[path]].js
 | Build command | `npm run build` |
 | Build output directory | `dist` |
 | Root directory | 留空（仓库根目录，**不要**填 `dist`） |
+| **Deploy command** | **留空**（不要填 `npx wrangler deploy`） |
+
+> ⚠️ **Deploy command 必须留空！** 若填写 `npx wrangler deploy` 会报错 `Missing entry-point to Worker script`，因为那是 Worker 命令，不是 Pages 命令。
 
 ### 环境变量
 
@@ -109,6 +112,25 @@ functions/api/[[path]].js
 Found Functions directory at /functions. Uploading.
 ✨ Compiled Worker successfully
 ```
+
+### 若构建成功但部署失败（`wrangler deploy` 错误）
+
+日志若出现：
+
+```
+Executing user deploy command: npx wrangler deploy
+Missing entry-point to Worker script or to assets directory
+```
+
+说明 **Deploy command 配置错误**。修复步骤：
+
+1. **Workers & Pages** → 项目 → **Settings** → **Build**
+2. 找到 **Deploy command** 字段
+3. **清空**该字段（删除 `npx wrangler deploy`）
+4. 只保留 Build command = `npm run build`，Output = `dist`
+5. 保存后 **Retry deployment**
+
+Git 连接的 Pages 项目会自动部署 `dist` 目录和 `functions/` 文件夹，**不需要** Deploy command。
 
 ### 若提示「No routes found / 无活动路由」
 
