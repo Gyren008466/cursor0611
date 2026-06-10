@@ -1,3 +1,6 @@
 name = "cursor0611"
 compatibility_date = "2024-09-01"
 pages_build_output_dir = "dist"
+
+# Cloudflare Pages Git 部署：构建命令 npm run build，输出目录 dist
+# 环境变量在 Dashboard → Settings → Environment variables 配置

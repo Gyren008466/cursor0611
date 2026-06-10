@@ -71,9 +71,15 @@ npm run dev
    - `OPENAI_API_KEY`（可选）
    - `GEMINI_API_KEY`（可选）
    - `OPENAI_BASE_URL`（可选，OpenAI 代理地址）
-4. 重新部署
+4. 确认 **Root directory** 为 `/`（仓库根目录，不要填 `dist`）
+5. 重新部署
 
-项目已包含 `functions/api/`（Cloudflare Pages Functions），线上会自动提供 `/api/models`、`/api/generate` 接口，无需单独部署 Node 后端。
+项目已包含 `functions/api/[[path]].js`（Cloudflare Pages Functions），线上会自动提供 `/api/models`、`/api/generate` 接口。
+
+**若提示「无活动路由 / No routes found」：**
+- 确认 `functions/api/[[path]].js` 文件存在于仓库根目录
+- Root directory 必须为空或 `/`
+- 构建命令：`npm run build`，输出目录：`dist`
 
 ## 技术栈
 
