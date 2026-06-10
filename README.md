@@ -62,24 +62,61 @@ npm run dev
 
 ## 部署到 Cloudflare Pages
 
-1. 在 Cloudflare Dashboard 连接 GitHub 仓库 `Gyren008466/cursor0611`
-2. 构建设置：
-   - **构建命令**：`npm run build`
-   - **构建输出目录**：`dist`
-3. 在 **Settings → Environment variables** 添加（Production）：
-   - `DASHSCOPE_API_KEY` = 你的百炼 API Key（**必填**）
-   - `OPENAI_API_KEY`（可选）
-   - `GEMINI_API_KEY`（可选）
-   - `OPENAI_BASE_URL`（可选，OpenAI 代理地址）
-4. 确认 **Root directory** 为 `/`（仓库根目录，不要填 `dist`）
-5. 重新部署
+线上 API 由 **Cloudflare Pages Functions** 提供，入口文件为：
 
-项目已包含 `functions/api/[[path]].js`（Cloudflare Pages Functions），线上会自动提供 `/api/models`、`/api/generate` 接口。
+```
+functions/api/[[path]].js
+```
 
-**若提示「无活动路由 / No routes found」：**
-- 确认 `functions/api/[[path]].js` 文件存在于仓库根目录
-- Root directory 必须为空或 `/`
-- 构建命令：`npm run build`，输出目录：`dist`
+无需单独部署 Node/Express 后端。部署后自动提供：
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/models` | GET | 获取 AI 模型列表 |
+| `/api/generate` | POST | 上传照片并生成证件照 |
+| `/api/health` | GET | 检查 API 与 Key 是否配置 |
+
+### Dashboard 构建设置（英文界面）
+
+路径：**Workers & Pages** → 你的项目 → **Settings** → **Build**
+
+| 设置项 | 值 |
+|--------|-----|
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Root directory | 留空（仓库根目录，**不要**填 `dist`） |
+
+### 环境变量
+
+路径：**Settings** → **Environment variables** → **Production**
+
+| 变量 | 必填 | 说明 |
+|------|------|------|
+| `DASHSCOPE_API_KEY` | 是 | 阿里云百炼 API Key |
+| `OPENAI_API_KEY` | 否 | OpenAI 模型 |
+| `GEMINI_API_KEY` | 否 | Gemini 模型 |
+| `OPENAI_BASE_URL` | 否 | OpenAI 代理地址 |
+
+### 查看 Functions 构建日志（英文界面）
+
+1. **Workers & Pages** → 项目 → **Deployments**
+2. 点击最新部署 → **View build log**
+3. 在日志中搜索：`Functions`、`No routes found`、`Compiled Worker`
+
+正常示例：
+
+```
+Found Functions directory at /functions. Uploading.
+✨ Compiled Worker successfully
+```
+
+### 若提示「No routes found / 无活动路由」
+
+1. 确认 GitHub 仓库根目录存在 `functions/api/[[path]].js`
+2. **Root directory** 留空，不要设为 `dist`
+3. 构建命令 `npm run build`，输出目录 `dist`
+4. 确认 `public/_routes.json` 已随构建进入 `dist` 目录
+5. 保存设置后 **Retry deployment**
 
 ## 技术栈
 
