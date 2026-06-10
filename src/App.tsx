@@ -9,18 +9,26 @@ import {
   generateIdPhoto,
   pickDefaultModel,
 } from './utils/imageUtils';
+import {
+  isNativeApp,
+  pickPhotoFromCamera,
+  pickPhotoFromGallery,
+} from './utils/platform';
 import './App.css';
 
 function App() {
+  const [nativeApp] = useState(isNativeApp);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const [generatedRaw, setGeneratedRaw] = useState<string | null>(null);
   const [displayImage, setDisplayImage] = useState<string | null>(null);
   const [background, setBackground] = useState<BackgroundColor>('blue');
   const [aiModels, setAiModels] = useState<AiModel[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessingBg, setIsProcessingBg] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewUrlRef = useRef<string | null>(null);
@@ -58,6 +66,7 @@ function App() {
   }, []);
 
   useEffect(() => {
+    setModelsLoading(true);
     fetchAiModels()
       .then((models) => {
         setAiModels(models);
@@ -65,7 +74,8 @@ function App() {
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : '无法连接 API 服务');
-      });
+      })
+      .finally(() => setModelsLoading(false));
   }, []);
 
   const selectedModelInfo = aiModels.find((m) => m.id === selectedModel);
@@ -97,7 +107,11 @@ function App() {
       }
 
       if (!selectedModel) {
-        setError('请等待 AI 模型加载完成');
+        setError(
+          modelsLoading
+            ? '请等待 AI 模型加载完成'
+            : 'AI 模型加载失败，请检查网络后重启 App',
+        );
         return;
       }
 
@@ -172,6 +186,31 @@ function App() {
     e.target.value = '';
   };
 
+  const handleNativePick = async (source: 'camera' | 'gallery') => {
+    setError(null);
+    try {
+      const file =
+        source === 'camera'
+          ? await pickPhotoFromCamera()
+          : await pickPhotoFromGallery();
+      if (file) handleFile(file);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '无法获取照片');
+    }
+  };
+
+  const handleExport = async (format: 'png' | 'jpg') => {
+    if (!displayImage) return;
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      const result = await downloadImage(displayImage, format);
+      setSuccessMsg(result === 'saved' ? '已保存到相册' : '已开始下载');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '保存失败');
+    }
+  };
+
   return (
     <div className="app">
       <header className="header">
@@ -200,9 +239,10 @@ function App() {
               setDragOver(true);
             }}
             onDragLeave={() => setDragOver(false)}
-            onDrop={onDrop}
-            onClick={() => fileInputRef.current?.click()}
+            onDrop={nativeApp ? undefined : onDrop}
+            onClick={nativeApp ? undefined : () => fileInputRef.current?.click()}
           >
+            {!nativeApp && (
             <input
               ref={fileInputRef}
               type="file"
@@ -210,15 +250,40 @@ function App() {
               onChange={onFileSelect}
               hidden
             />
+            )}
+
+            {nativeApp && !originalPreview && (
+              <div className="native-pick-actions" onClick={(e) => e.stopPropagation()}>
+                <button type="button" className="native-pick-btn" onClick={() => handleNativePick('camera')}>
+                  📷 拍照
+                </button>
+                <button type="button" className="native-pick-btn native-pick-btn-secondary" onClick={() => handleNativePick('gallery')}>
+                  🖼️ 从相册选择
+                </button>
+              </div>
+            )}
+
+            {nativeApp && originalPreview && (
+              <div className="native-pick-actions native-pick-actions-overlay" onClick={(e) => e.stopPropagation()}>
+                <button type="button" className="native-pick-btn native-pick-btn-sm" onClick={() => handleNativePick('camera')}>
+                  重拍
+                </button>
+                <button type="button" className="native-pick-btn native-pick-btn-sm native-pick-btn-secondary" onClick={() => handleNativePick('gallery')}>
+                  换一张
+                </button>
+              </div>
+            )}
 
             {originalPreview ? (
               <div className="preview-container">
                 <img src={originalPreview} alt="原始照片" className="preview-image" />
+                {!nativeApp && (
                 <div className="preview-overlay">
                   <span>点击或拖拽更换照片</span>
                 </div>
+                )}
               </div>
-            ) : (
+            ) : nativeApp ? null : (
               <div className="upload-placeholder">
                 <div className="upload-icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -243,8 +308,14 @@ function App() {
                 className="model-select"
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                disabled={isGenerating || aiModels.length === 0}
+                disabled={isGenerating || modelsLoading || aiModels.length === 0}
               >
+                {modelsLoading && (
+                  <option value="">正在加载 AI 模型…</option>
+                )}
+                {!modelsLoading && aiModels.length === 0 && (
+                  <option value="">模型加载失败，请检查网络</option>
+                )}
                 {aiModels.map((model) => (
                   <option
                     key={model.id}
@@ -284,6 +355,16 @@ function App() {
               )}
             </div>
           </div>
+
+          {successMsg && (
+            <div className="success-banner">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <span>{successMsg}</span>
+            </div>
+          )}
 
           {error && (
             <div className="error-banner">
@@ -395,33 +476,33 @@ function App() {
             </div>
 
             <div className="control-group">
-              <label className="control-label">导出格式</label>
+              <label className="control-label">{nativeApp ? '保存到相册' : '导出格式'}</label>
               <div className="export-buttons">
                 <button
                   type="button"
                   className="export-btn"
                   disabled={!displayImage}
-                  onClick={() => displayImage && downloadImage(displayImage, 'png')}
+                  onClick={() => handleExport('png')}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
-                  导出 PNG
+                  {nativeApp ? '保存 PNG' : '导出 PNG'}
                 </button>
                 <button
                   type="button"
                   className="export-btn export-btn-secondary"
                   disabled={!displayImage}
-                  onClick={() => displayImage && downloadImage(displayImage, 'jpg')}
+                  onClick={() => handleExport('jpg')}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
-                  导出 JPG
+                  {nativeApp ? '保存 JPG' : '导出 JPG'}
                 </button>
               </div>
             </div>
@@ -431,6 +512,11 @@ function App() {
 
       <footer className="footer">
         <p>美式证件照 · 专业 AI 生成 · 支持自定义背景与多格式导出</p>
+        {!nativeApp && (
+          <p className="footer-links">
+            <a href="./download/">下载 Android APK</a>
+          </p>
+        )}
       </footer>
     </div>
   );

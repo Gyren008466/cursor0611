@@ -1,4 +1,10 @@
+import { getApiBase, isNativeApp, saveImageToGallery } from './platform';
+
 export type BackgroundColor = 'blue' | 'red' | 'white' | 'black' | 'transparent';
+
+function apiUrl(path: string): string {
+  return `${getApiBase()}${path}`;
+}
 
 export type AiModel = {
   id: string;
@@ -29,10 +35,12 @@ export const BACKGROUND_OPTIONS: {
 export async function fetchAiModels(): Promise<AiModel[]> {
   let response: Response;
   try {
-    response = await fetch('/api/models');
+    response = await fetch(apiUrl('/api/models'));
   } catch {
     throw new Error(
-      '无法连接 API 服务。本地开发请运行 npm run dev；Cloudflare 部署请在 Pages 设置中配置 Functions 与环境变量 DASHSCOPE_API_KEY',
+      isNativeApp()
+        ? '无法连接 API 服务，请确认 .env.production 中 VITE_API_BASE_URL 指向已部署的 Cloudflare 地址'
+        : '无法连接 API 服务。本地开发请运行 npm run dev；Cloudflare 部署请在 Pages 设置中配置 Functions 与环境变量 DASHSCOPE_API_KEY',
     );
   }
   if (!response.ok) throw new Error('无法加载 AI 模型列表');
@@ -47,12 +55,16 @@ export async function generateIdPhoto(file: File, modelId: string): Promise<stri
 
   let response: Response;
   try {
-    response = await fetch('/api/generate', {
+    response = await fetch(apiUrl('/api/generate'), {
       method: 'POST',
       body: formData,
     });
   } catch {
-    throw new Error('无法连接本地服务器，请确认已运行 npm run dev');
+    throw new Error(
+      isNativeApp()
+        ? '无法连接 API 服务器，请检查网络与 VITE_API_BASE_URL 配置'
+        : '无法连接本地服务器，请确认已运行 npm run dev',
+    );
   }
 
   let data: { message?: string; image?: string };
@@ -126,35 +138,47 @@ export async function applyBackground(
   });
 }
 
-export function downloadImage(
+export async function downloadImage(
   imageSrc: string,
   format: 'png' | 'jpg',
   filename = 'american-id-photo',
-) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+): Promise<'saved' | 'downloaded'> {
+  if (isNativeApp()) {
+    await saveImageToGallery(imageSrc, format, filename);
+    return 'saved';
+  }
 
-    if (format === 'jpg') {
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas not supported'));
+        return;
+      }
 
-    ctx.drawImage(img, 0, 0);
+      if (format === 'jpg') {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
 
-    const mime = format === 'png' ? 'image/png' : 'image/jpeg';
-    const ext = format === 'png' ? 'png' : 'jpg';
-    const link = document.createElement('a');
-    link.download = `${filename}.${ext}`;
-    link.href = canvas.toDataURL(mime, format === 'jpg' ? 0.92 : 1);
-    link.click();
-  };
-  img.src = imageSrc;
+      ctx.drawImage(img, 0, 0);
+
+      const mime = format === 'png' ? 'image/png' : 'image/jpeg';
+      const ext = format === 'png' ? 'png' : 'jpg';
+      const link = document.createElement('a');
+      link.download = `${filename}.${ext}`;
+      link.href = canvas.toDataURL(mime, format === 'jpg' ? 0.92 : 1);
+      link.click();
+      resolve('downloaded');
+    };
+    img.onerror = () => reject(new Error('无法加载图片'));
+    img.src = imageSrc;
+  });
 }
 
 export function pickDefaultModel(models: AiModel[]): string {

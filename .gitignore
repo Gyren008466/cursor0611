@@ -2,6 +2,10 @@ node_modules
 dist
 .env
 *.local
+.env.production
 .wrangler
 push.log
 git-trace.log
+*.keystore
+android/keystore.properties
+local.properties

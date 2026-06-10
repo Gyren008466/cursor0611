@@ -60,6 +60,29 @@ npm run dev
 3. 等待右侧自动生成美式证件照
 4. 切换背景颜色，导出 PNG 或 JPG
 
+## Android APK（侧载安装）
+
+项目已集成 **Capacitor Android**，支持：
+
+- 📷 拍照 / 从相册选图
+- 💾 保存证件照到系统相册
+- 调用 Cloudflare 线上 API 生成
+
+| 资源 | 说明 |
+|------|------|
+| [ANDROID.md](./ANDROID.md) | 完整构建与 release 签名指南 |
+| `/download/` | Web 下载页（部署后访问 `https://你的域名/download/`） |
+
+快速开始：
+
+```bash
+cp .env.production.example .env.production   # 填入 Cloudflare 域名
+npm run cap:sync                             # 构建并同步到 android/
+npm run cap:open                             # Android Studio 打开工程
+```
+
+构建 release APK 后，复制到 `public/download/american-id-photo.apk` 并重新部署即可提供下载。
+
 ## 部署到 Cloudflare Pages
 
 线上 API 由 **Cloudflare Pages Functions** 提供，入口文件为：
@@ -84,10 +107,13 @@ functions/api/[[path]].js
 |--------|-----|
 | Build command | `npm run build` |
 | Build output directory | `dist` |
-| Root directory | 留空（仓库根目录，**不要**填 `dist`） |
-| **Deploy command** | **留空**（不要填 `npx wrangler deploy`） |
+| Root directory | **完全留空**（不要填 `/`、`dist` 或任何路径） |
+| **Deploy command** | **完全留空**（删除所有内容，不要填 `/` 或任何命令） |
 
-> ⚠️ **Deploy command 必须留空！** 若填写 `npx wrangler deploy` 会报错 `Missing entry-point to Worker script`，因为那是 Worker 命令，不是 Pages 命令。
+> ⚠️ **Deploy command 必须为空！**
+> - 填 `npx wrangler deploy` → `Missing entry-point to Worker script`
+> - 填 `/` → `Permission denied`
+> - Git 连接的 Pages 会自动部署，此字段留空即可
 
 ### 环境变量
 
@@ -113,6 +139,16 @@ Found Functions directory at /functions. Uploading.
 ✨ Compiled Worker successfully
 ```
 
+### 若提示 `root directory not found`
+
+说明 **Root directory** 填了不存在的路径。修复：
+
+1. **Settings** → **Build** → **Root directory**
+2. **完全清空**该字段（不能填 `/`、`dist`、`src` 等）
+3. 保存后重新部署
+
+本项目所有文件在仓库根目录（`package.json` 在根目录），Root directory 必须为空。
+
 ### 若构建成功但部署失败（`wrangler deploy` 错误）
 
 日志若出现：
@@ -126,7 +162,7 @@ Missing entry-point to Worker script or to assets directory
 
 1. **Workers & Pages** → 项目 → **Settings** → **Build**
 2. 找到 **Deploy command** 字段
-3. **清空**该字段（删除 `npx wrangler deploy`）
+3. **完全清空**该字段（不能是 `/`、空格或任何命令，必须为空）
 4. 只保留 Build command = `npm run build`，Output = `dist`
 5. 保存后 **Retry deployment**
 

@@ -9,12 +9,21 @@
     "dev:server": "node server/index.js",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "pages:build": "npm run build"
+    "pages:build": "npm run build",
+    "cap:sync": "npm run build && npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:run": "npm run cap:sync && npx cap run android"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
+    "@capacitor-community/media": "^9.1.0",
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/camera": "^8.2.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
+    "@capacitor/filesystem": "^8.1.2",
     "@imgly/background-removal": "^1.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
