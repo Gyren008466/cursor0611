@@ -60,9 +60,25 @@ npm run dev
 3. 等待右侧自动生成美式证件照
 4. 切换背景颜色，导出 PNG 或 JPG
 
+## 部署到 Cloudflare Pages
+
+1. 在 Cloudflare Dashboard 连接 GitHub 仓库 `Gyren008466/cursor0611`
+2. 构建设置：
+   - **构建命令**：`npm run build`
+   - **构建输出目录**：`dist`
+3. 在 **Settings → Environment variables** 添加（Production）：
+   - `DASHSCOPE_API_KEY` = 你的百炼 API Key（**必填**）
+   - `OPENAI_API_KEY`（可选）
+   - `GEMINI_API_KEY`（可选）
+   - `OPENAI_BASE_URL`（可选，OpenAI 代理地址）
+4. 重新部署
+
+项目已包含 `functions/api/`（Cloudflare Pages Functions），线上会自动提供 `/api/models`、`/api/generate` 接口，无需单独部署 Node 后端。
+
 ## 技术栈
 
 - React 19 + TypeScript + Vite
 - @imgly/background-removal（背景合成）
-- Express 后端（多模型路由）
-- OpenAI / Google Gemini / Hugging Face / Pollinations / Together / Replicate
+- 本地开发：Express 后端
+- 线上部署：Cloudflare Pages Functions
+- OpenAI / Google Gemini / 阿里云百炼

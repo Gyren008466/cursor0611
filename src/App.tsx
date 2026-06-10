@@ -63,8 +63,8 @@ function App() {
         setAiModels(models);
         setSelectedModel(pickDefaultModel(models));
       })
-      .catch(() => {
-        setError('无法连接后端服务，请确认已运行 npm run dev');
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : '无法连接 API 服务');
       });
   }, []);
 

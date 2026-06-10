@@ -27,7 +27,14 @@ export const BACKGROUND_OPTIONS: {
 ];
 
 export async function fetchAiModels(): Promise<AiModel[]> {
-  const response = await fetch('/api/models');
+  let response: Response;
+  try {
+    response = await fetch('/api/models');
+  } catch {
+    throw new Error(
+      '无法连接 API 服务。本地开发请运行 npm run dev；Cloudflare 部署请在 Pages 设置中配置 Functions 与环境变量 DASHSCOPE_API_KEY',
+    );
+  }
   if (!response.ok) throw new Error('无法加载 AI 模型列表');
   const data = await response.json();
   return data.models as AiModel[];
