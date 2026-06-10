@@ -3,184 +3,708 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>下载 Android APK · 美式证件照</title>
+    <meta name="description" content="US ID Photo — AI-powered American-style professional headshots. Early access beta, free download for Android." />
+    <title>US ID Photo · Android Download</title>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <style>
       :root {
-        --bg: #f8f9fb;
-        --surface: #ffffff;
-        --text: #1a1d26;
-        --text-muted: #6b7280;
-        --primary: #2563eb;
-        --primary-dark: #1d4ed8;
-        --border: #e5e7eb;
-        --radius: 16px;
+        --glass: rgba(255, 255, 255, 0.07);
+        --glass-strong: rgba(255, 255, 255, 0.13);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --text: #f5f5f7;
+        --text-secondary: rgba(245, 245, 247, 0.72);
+        --text-tertiary: rgba(245, 245, 247, 0.45);
+        --accent: #0a84ff;
+        --accent-hover: #409cff;
+        --green: #30d158;
+        --radius: 22px;
+        --radius-sm: 14px;
       }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; }
 
       body {
-        font-family: 'DM Sans', system-ui, sans-serif;
-        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+          'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background: #000;
         color: var(--text);
         min-height: 100vh;
-        line-height: 1.6;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
       }
 
-      .wrap {
-        max-width: 640px;
-        margin: 0 auto;
-        padding: 2rem 1.25rem 3rem;
+      .bg {
+        position: fixed; inset: 0; z-index: 0;
+        background: #050508; overflow: hidden;
+      }
+      .bg-blob {
+        position: absolute; border-radius: 50%;
+        filter: blur(90px); opacity: 0.5;
+        animation: drift 20s ease-in-out infinite alternate;
+      }
+      .bg-blob-1 { width: 60vw; height: 60vw; max-width: 560px; max-height: 560px;
+        background: radial-gradient(circle, #1d4ed8, transparent 70%);
+        top: -12%; left: -18%; }
+      .bg-blob-2 { width: 55vw; height: 55vw; max-width: 500px; max-height: 500px;
+        background: radial-gradient(circle, #6d28d9, transparent 70%);
+        top: 30%; right: -22%; animation-delay: -7s; }
+      .bg-blob-3 { width: 50vw; height: 50vw; max-width: 460px; max-height: 460px;
+        background: radial-gradient(circle, #0e7490, transparent 70%);
+        bottom: 0; left: 20%; animation-delay: -14s; }
+      .bg-noise {
+        position: absolute; inset: 0; opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       }
 
-      .back {
-        display: inline-block;
-        margin-bottom: 1.5rem;
-        color: var(--primary);
-        text-decoration: none;
-        font-size: 0.9375rem;
+      @keyframes drift {
+        from { transform: translate(0,0) scale(1); }
+        to { transform: translate(24px,16px) scale(1.06); }
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(10,132,255,0.4); }
+        50% { box-shadow: 0 0 0 14px rgba(10,132,255,0); }
       }
 
-      .back:hover {
-        text-decoration: underline;
+      .page {
+        position: relative; z-index: 1;
+        max-width: 1140px; margin: 0 auto;
+        padding: 0 1.25rem 5rem;
       }
 
-      .card {
-        background: var(--surface);
-        border: 1px solid var(--border);
+      .glass {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(48px) saturate(180%);
+        -webkit-backdrop-filter: blur(48px) saturate(180%);
         border-radius: var(--radius);
-        padding: 2rem;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
       }
 
-      .icon {
-        font-size: 3rem;
-        line-height: 1;
-        margin-bottom: 1rem;
+      /* Nav */
+      .nav {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1.25rem 0;
+        animation: fadeUp 0.7s ease both;
       }
+      .nav-logo {
+        display: flex; align-items: center; gap: 0.6rem;
+        text-decoration: none; color: var(--text);
+      }
+      .nav-logo-icon {
+        width: 30px; height: 30px; border-radius: 8px;
+        background: linear-gradient(135deg, #0a84ff, #5e5ce6);
+        display: flex; align-items: center; justify-content: center; font-size: 15px;
+      }
+      .nav-logo-text strong {
+        display: block; font-size: 0.9375rem; font-weight: 600; letter-spacing: -0.02em;
+      }
+      .nav-logo-text span {
+        font-size: 0.6875rem; color: var(--text-tertiary); letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .nav-links { display: flex; gap: 0.5rem; }
+      .nav-link {
+        font-size: 0.8125rem; color: var(--text-secondary); text-decoration: none;
+        padding: 0.45rem 1rem; border-radius: 999px;
+        background: var(--glass); border: 1px solid var(--glass-border);
+        backdrop-filter: blur(20px); transition: 0.2s;
+      }
+      .nav-link:hover { background: var(--glass-strong); color: var(--text); }
 
-      h1 {
-        font-size: 1.75rem;
-        letter-spacing: -0.02em;
+      /* Section headers */
+      .section-head { text-align: center; margin-bottom: 2.5rem; }
+      .section-label {
+        font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem;
+      }
+      .section-title {
+        font-size: clamp(1.625rem, 4vw, 2.25rem);
+        font-weight: 700; letter-spacing: -0.035em; line-height: 1.15;
         margin-bottom: 0.5rem;
       }
-
-      .subtitle {
-        color: var(--text-muted);
-        margin-bottom: 1.75rem;
+      .section-subtitle {
+        font-size: 0.9375rem; color: var(--text-secondary); max-width: 480px;
+        margin: 0 auto; line-height: 1.55;
+      }
+      .section-subtitle-en {
+        font-size: 0.8125rem; color: var(--text-tertiary);
+        margin-top: 0.35rem; letter-spacing: 0.01em;
       }
 
-      .download-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.625rem;
-        width: 100%;
-        padding: 1rem 1.5rem;
-        border: none;
-        border-radius: 12px;
-        background: var(--primary);
-        color: #fff;
-        font-size: 1.0625rem;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        transition: background 0.15s;
+      /* Hero */
+      .hero {
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: 2.5rem; align-items: center;
+        padding: 2rem 0 4rem;
+        animation: fadeUp 0.8s ease 0.05s both;
+      }
+      .hero-content { text-align: left; }
+      .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+      .badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        padding: 0.3rem 0.8rem; border-radius: 999px;
+        font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .badge-beta {
+        background: rgba(10,132,255,0.18); border: 1px solid rgba(10,132,255,0.38);
+        color: #64b5ff;
+      }
+      .badge-free {
+        background: rgba(48,209,88,0.12); border: 1px solid rgba(48,209,88,0.32);
+        color: var(--green);
+      }
+      .hero h1 {
+        font-size: clamp(2.25rem, 5vw, 3.25rem);
+        font-weight: 700; letter-spacing: -0.04em; line-height: 1.05;
+        margin-bottom: 0.35rem;
+        background: linear-gradient(180deg, #fff 30%, rgba(255,255,255,0.7));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hero h1 .en {
+        display: block; font-size: 0.42em; font-weight: 500;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        -webkit-text-fill-color: var(--text-tertiary);
+        margin-bottom: 0.25rem;
+      }
+      .hero-tagline {
+        font-size: 1.0625rem; color: var(--text-secondary);
+        line-height: 1.6; margin-bottom: 0.35rem; max-width: 420px;
+      }
+      .hero-tagline-en {
+        font-size: 0.875rem; color: var(--text-tertiary);
+        line-height: 1.55; margin-bottom: 1.75rem; max-width: 420px;
+      }
+      .btn-download {
+        display: inline-flex; align-items: center; gap: 0.6rem;
+        padding: 0.95rem 1.85rem; border-radius: 999px;
+        background: var(--accent); color: #fff;
+        font-size: 1rem; font-weight: 600; font-family: inherit;
+        text-decoration: none; letter-spacing: -0.01em;
+        transition: 0.2s; animation: pulse-glow 2.5s ease infinite;
+      }
+      .btn-download:hover { background: var(--accent-hover); transform: scale(1.03); }
+      .btn-download-sub {
+        display: block; margin-top: 0.65rem;
+        font-size: 0.75rem; color: var(--text-tertiary);
       }
 
-      .download-btn:hover {
-        background: var(--primary-dark);
+      /* Phone mockup */
+      .hero-phones {
+        display: flex; justify-content: center; align-items: flex-end;
+        gap: 1rem; perspective: 900px;
+      }
+      .phone {
+        width: 148px; border-radius: 28px;
+        background: linear-gradient(160deg, #2a2a2e, #111114);
+        border: 2px solid rgba(255,255,255,0.14);
+        box-shadow: 0 30px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.1);
+        overflow: hidden; flex-shrink: 0;
+      }
+      .phone-center { width: 168px; animation: float 5s ease-in-out infinite; z-index: 2; }
+      .phone-side { opacity: 0.75; transform: scale(0.92) translateY(12px); }
+      .phone-notch {
+        width: 56px; height: 16px; background: #000;
+        border-radius: 0 0 12px 12px; margin: 0 auto;
+      }
+      .phone-screen {
+        margin: 0 6px 6px; border-radius: 20px;
+        background: #0d0d12; overflow: hidden; min-height: 260px;
+      }
+      .phone-center .phone-screen { min-height: 300px; }
+      .ui-bar {
+        display: flex; align-items: center; gap: 4px;
+        padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .ui-dot { width: 6px; height: 6px; border-radius: 50%; background: #0a84ff; }
+      .ui-title { font-size: 7px; color: var(--text-secondary); font-weight: 600; }
+      .ui-body { padding: 8px; }
+      .ui-upload {
+        border: 1px dashed rgba(255,255,255,0.15); border-radius: 10px;
+        height: 72px; display: flex; align-items: center; justify-content: center;
+        font-size: 18px; margin-bottom: 6px;
+      }
+      .ui-photo {
+        width: 100%; aspect-ratio: 3/4; border-radius: 10px;
+        object-fit: cover; display: block;
+      }
+      .ui-btn-row { display: flex; gap: 4px; margin-top: 6px; }
+      .ui-btn {
+        flex: 1; height: 18px; border-radius: 6px;
+        background: rgba(10,132,255,0.25); border: 1px solid rgba(10,132,255,0.3);
+      }
+      .ui-btn.secondary { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+      .ui-label { font-size: 6px; color: var(--text-tertiary); margin-top: 5px; text-align: center; }
+
+      /* Showcase gallery */
+      .showcase {
+        margin-bottom: 4rem;
+        animation: fadeUp 0.8s ease 0.2s both;
+      }
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+      }
+      .gallery-item {
+        position: relative; border-radius: var(--radius-sm);
+        overflow: hidden; aspect-ratio: 3/4;
+        border: 1px solid rgba(255,255,255,0.12);
+        box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .gallery-item:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+      }
+      .gallery-item img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+      }
+      .gallery-cap {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        padding: 2rem 0.75rem 0.75rem;
+        background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      }
+      .gallery-cap strong {
+        display: block; font-size: 0.75rem; font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .gallery-cap span {
+        font-size: 0.625rem; color: rgba(255,255,255,0.55);
+        text-transform: uppercase; letter-spacing: 0.06em;
       }
 
-      .meta {
-        margin-top: 1rem;
-        text-align: center;
-        font-size: 0.8125rem;
-        color: var(--text-muted);
+      /* App screens section */
+      .app-showcase {
+        display: grid; grid-template-columns: 1fr 1.2fr;
+        gap: 2rem; align-items: center;
+        padding: 2.5rem; margin-bottom: 3rem;
+        animation: fadeUp 0.8s ease 0.3s both;
+      }
+      .app-showcase-text h3 {
+        font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em;
+        margin-bottom: 0.5rem;
+      }
+      .app-showcase-text .en-sub {
+        font-size: 0.8125rem; color: var(--accent);
+        letter-spacing: 0.08em; text-transform: uppercase;
+        font-weight: 600; margin-bottom: 1rem;
+      }
+      .app-showcase-text p {
+        font-size: 0.9375rem; color: var(--text-secondary);
+        line-height: 1.65; margin-bottom: 0.75rem;
+      }
+      .app-features-list {
+        list-style: none; margin-top: 1.25rem;
+      }
+      .app-features-list li {
+        display: flex; gap: 0.75rem; align-items: flex-start;
+        padding: 0.6rem 0; font-size: 0.875rem; color: var(--text-secondary);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+      }
+      .app-features-list li:last-child { border-bottom: none; }
+      .app-features-list .check {
+        width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+        background: rgba(48,209,88,0.15); border: 1px solid rgba(48,209,88,0.35);
+        color: var(--green); font-size: 11px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .screens-row {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+      }
+      .screen-card {
+        border-radius: 16px; overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(0,0,0,0.3);
+      }
+      .screen-card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+      .screen-card figcaption {
+        padding: 0.6rem 0.75rem; font-size: 0.6875rem;
+        color: var(--text-tertiary); text-align: center;
+        border-top: 1px solid rgba(255,255,255,0.06);
+      }
+      .screen-card figcaption strong {
+        display: block; color: var(--text-secondary);
+        font-size: 0.75rem; margin-bottom: 0.15rem;
       }
 
-      .section {
-        margin-top: 2rem;
+      /* Feature grid */
+      .features {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 1rem; margin-bottom: 3rem;
+        animation: fadeUp 0.8s ease 0.35s both;
+      }
+      .feature-card { padding: 1.5rem; transition: 0.25s; }
+      .feature-card:hover { transform: translateY(-4px); background: var(--glass-strong); }
+      .feature-icon {
+        width: 40px; height: 40px; border-radius: 11px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.125rem; margin-bottom: 0.875rem;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      }
+      .feature-card h3 {
+        font-size: 1rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.2rem;
+      }
+      .feature-card .en {
+        font-size: 0.6875rem; color: var(--text-tertiary);
+        letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.5rem;
+      }
+      .feature-card p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.55; }
+
+      /* Models */
+      .models-strip {
+        padding: 2rem; margin-bottom: 3rem; text-align: center;
+        animation: fadeUp 0.8s ease 0.4s both;
+      }
+      .model-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 1rem; }
+      .model-tag {
+        padding: 0.38rem 0.9rem; border-radius: 999px;
+        font-size: 0.8125rem; font-weight: 500;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        color: var(--text-secondary);
+      }
+      .model-tag.highlight {
+        background: rgba(10,132,255,0.14); border-color: rgba(10,132,255,0.28); color: #7ec8ff;
       }
 
-      .section h2 {
-        font-size: 1rem;
-        margin-bottom: 0.75rem;
+      /* CTA banner */
+      .cta-banner {
+        text-align: center; padding: 3rem 2rem; margin-bottom: 3rem;
+        animation: fadeUp 0.8s ease 0.45s both;
       }
-
-      .steps {
-        padding-left: 1.25rem;
-        color: var(--text-muted);
-        font-size: 0.9375rem;
+      .cta-banner h2 {
+        font-size: clamp(1.5rem, 3.5vw, 2rem);
+        font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.5rem;
       }
+      .cta-banner p { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9375rem; }
 
+      /* Install */
+      .install { padding: 2rem; margin-bottom: 2rem; animation: fadeUp 0.8s ease 0.5s both; }
+      .install h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; }
+      .install .en { font-size: 0.75rem; color: var(--text-tertiary); letter-spacing: 0.06em;
+        text-transform: uppercase; margin-bottom: 1.25rem; }
+      .steps { list-style: none; counter-reset: step; }
       .steps li {
-        margin-bottom: 0.5rem;
+        counter-increment: step; display: flex; gap: 1rem; align-items: flex-start;
+        padding: 0.875rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;
+      }
+      .steps li:last-child { border-bottom: none; }
+      .steps li::before {
+        content: counter(step); flex-shrink: 0;
+        width: 26px; height: 26px; border-radius: 50%;
+        background: rgba(10,132,255,0.18); border: 1px solid rgba(10,132,255,0.32);
+        color: #64b5ff; font-size: 0.75rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .step-en { display: block; font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.15rem; }
+
+      .footer {
+        text-align: center; padding-top: 1rem;
+        animation: fadeUp 0.8s ease 0.55s both;
+      }
+      .footer-brand {
+        font-size: 0.8125rem; color: var(--text-tertiary); margin-bottom: 0.75rem;
+      }
+      .footer-brand strong { color: var(--text-secondary); }
+      .footer-links { display: flex; flex-wrap: wrap; gap: 1.25rem; justify-content: center; margin-bottom: 1.5rem; }
+      .footer-links a { font-size: 0.875rem; color: var(--accent); text-decoration: none; }
+      .footer-links a:hover { text-decoration: underline; }
+      .disclaimer {
+        padding: 1rem 1.25rem; border-radius: var(--radius-sm);
+        background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+        font-size: 0.75rem; color: var(--text-tertiary); line-height: 1.6;
       }
 
-      .note {
-        margin-top: 1.5rem;
-        padding: 1rem;
-        border-radius: 10px;
-        background: #fffbeb;
-        color: #92400e;
-        font-size: 0.875rem;
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; text-align: center; gap: 2rem; }
+        .hero-content { text-align: center; }
+        .hero-tagline, .hero-tagline-en { margin-left: auto; margin-right: auto; }
+        .badges { justify-content: center; }
+        .gallery { grid-template-columns: repeat(2, 1fr); }
+        .features { grid-template-columns: 1fr 1fr; }
+        .app-showcase { grid-template-columns: 1fr; padding: 1.75rem; }
+        .phone-side { display: none; }
       }
-
-      .web-link {
-        display: block;
-        margin-top: 1.5rem;
-        text-align: center;
-        color: var(--primary);
-        font-size: 0.9375rem;
+      @media (max-width: 560px) {
+        .features { grid-template-columns: 1fr; }
+        .screens-row { grid-template-columns: 1fr 1fr; }
+        .screens-row .screen-card:last-child { grid-column: span 2; max-width: 50%; margin: 0 auto; }
+        .hero-phones .phone-center { width: 150px; }
       }
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <a class="back" href="../">← 返回 Web 版</a>
+    <div class="bg" aria-hidden="true">
+      <div class="bg-blob bg-blob-1"></div>
+      <div class="bg-blob bg-blob-2"></div>
+      <div class="bg-blob bg-blob-3"></div>
+      <div class="bg-noise"></div>
+    </div>
 
-      <div class="card">
-        <div class="icon">📱</div>
-        <h1>美式证件照 Android 版</h1>
-        <p class="subtitle">下载 APK 安装到手机，支持拍照、相册选图与保存到相册。</p>
-
-        <a class="download-btn" href="./american-id-photo.apk" download>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          下载 APK
+    <div class="page">
+      <nav class="nav">
+        <a class="nav-logo" href="../">
+          <span class="nav-logo-icon">📸</span>
+          <span class="nav-logo-text">
+            <strong>US ID Photo</strong>
+            <span>美式证件照</span>
+          </span>
         </a>
-        <p class="meta">版本 1.0.0 · 需 Android 7.0+</p>
+        <div class="nav-links">
+          <a class="nav-link" href="#showcase">Gallery</a>
+          <a class="nav-link" href="../">Web App</a>
+        </div>
+      </nav>
 
-        <div class="section">
-          <h2>安装步骤</h2>
-          <ol class="steps">
-            <li>下载 <code>american-id-photo.apk</code> 到手机</li>
-            <li>打开文件，若提示「未知来源」，在设置中允许浏览器/文件管理器安装应用</li>
-            <li>完成安装后打开 App，允许相机与相册权限</li>
-            <li>拍照或选图，即可生成美式证件照</li>
-          </ol>
+      <!-- Hero -->
+      <header class="hero">
+        <div class="hero-content">
+          <div class="badges">
+            <span class="badge badge-beta">✦ Early Access Beta</span>
+            <span class="badge badge-free">Free · 限时免费</span>
+          </div>
+          <h1>
+            <span class="en">US ID Photo</span>
+            美式证件照
+          </h1>
+          <p class="hero-tagline">
+            专业 AI 大模型驱动，一键生成美式标准证件照。
+          </p>
+          <p class="hero-tagline-en">
+            Powered by frontier AI models. Transform any selfie into a studio-quality American-style professional headshot — in seconds.
+          </p>
+          <a class="btn-download" href="./american-id-photo.apk" download>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download APK
+          </a>
+          <span class="btn-download-sub">v1.0.0 · Android 7.0+ · 抢先版内测</span>
         </div>
 
-        <div class="note">
-          若下载按钮无效，说明 APK 尚未上传到服务器。请按项目根目录 <strong>ANDROID.md</strong> 构建 release APK，并将文件复制到 <code>public/download/american-id-photo.apk</code> 后重新部署。
+        <div class="hero-phones" aria-hidden="true">
+          <div class="phone phone-side">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="ui-bar"><div class="ui-dot"></div><span class="ui-title">Upload</span></div>
+              <div class="ui-body">
+                <div class="ui-upload">📷</div>
+                <div class="ui-btn-row"><div class="ui-btn"></div><div class="ui-btn secondary"></div></div>
+                <div class="ui-label">Camera · Gallery</div>
+              </div>
+            </div>
+          </div>
+          <div class="phone phone-center">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="ui-bar"><div class="ui-dot"></div><span class="ui-title">AI Generate</span></div>
+              <div class="ui-body">
+                <img class="ui-photo" src="./assets/demo-male-id-photo.png" alt="" />
+                <div class="ui-btn-row"><div class="ui-btn"></div><div class="ui-btn secondary"></div></div>
+                <div class="ui-label">万相 2.7 Pro</div>
+              </div>
+            </div>
+          </div>
+          <div class="phone phone-side">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="ui-bar"><div class="ui-dot"></div><span class="ui-title">Export</span></div>
+              <div class="ui-body">
+                <img class="ui-photo" src="./assets/demo-female-id-photo.png" alt="" />
+                <div class="ui-btn-row"><div class="ui-btn"></div><div class="ui-btn secondary"></div></div>
+                <div class="ui-label">Save to Album</div>
+              </div>
+            </div>
+          </div>
         </div>
+      </header>
 
-        <a class="web-link" href="../">或在浏览器中使用 Web 版 →</a>
+      <!-- Gallery -->
+      <section class="showcase" id="showcase">
+        <div class="section-head">
+          <p class="section-label">Studio Quality · 专业效果</p>
+          <h2 class="section-title">AI-Generated Results</h2>
+          <p class="section-subtitle">帅气男女模特示范，真实 AI 生成效果</p>
+          <p class="section-subtitle-en">Real AI output — professional American headshots with studio lighting</p>
+        </div>
+        <div class="gallery">
+          <figure class="gallery-item">
+            <img src="./assets/demo-male-id-photo.png" alt="Male model — blue background" loading="lazy" />
+            <figcaption class="gallery-cap">
+              <strong>Blue Studio</strong>
+              <span>Classic US Standard</span>
+            </figcaption>
+          </figure>
+          <figure class="gallery-item">
+            <img src="./assets/demo-female-id-photo.png" alt="Female model — blue background" loading="lazy" />
+            <figcaption class="gallery-cap">
+              <strong>Professional Look</strong>
+              <span>Corporate Ready</span>
+            </figcaption>
+          </figure>
+          <figure class="gallery-item">
+            <img src="./assets/demo-male-red-bg.png" alt="Male model — red background" loading="lazy" />
+            <figcaption class="gallery-cap">
+              <strong>Red Background</strong>
+              <span>Visa &amp; Immigration</span>
+            </figcaption>
+          </figure>
+          <figure class="gallery-item">
+            <img src="./assets/demo-female-white-bg.png" alt="Female model — white background" loading="lazy" />
+            <figcaption class="gallery-cap">
+              <strong>White Studio</strong>
+              <span>Clean &amp; Minimal</span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- App experience -->
+      <section class="app-showcase glass">
+        <div class="app-showcase-text">
+          <p class="en-sub">App Experience</p>
+          <h3>Designed for simplicity.<br />Built for results.</h3>
+          <p>简洁双栏界面，左侧上传选模，右侧即时预览。专为移动端优化的原生体验。</p>
+          <p style="font-size:0.8125rem;color:var(--text-tertiary)">
+            Native Android app with camera, gallery, and one-tap save to album.
+          </p>
+          <ul class="app-features-list">
+            <li><span class="check">✓</span><span>自拍 or 相册选图 · Camera &amp; Gallery upload</span></li>
+            <li><span class="check">✓</span><span>多种背景色切换 · Blue, Red, White, Black, Transparent</span></li>
+            <li><span class="check">✓</span><span>国内外 AI 模型 · Wanxiang, GPT Image, Gemini</span></li>
+            <li><span class="check">✓</span><span>一键保存相册 · Export PNG / JPG instantly</span></li>
+          </ul>
+        </div>
+        <div class="screens-row">
+          <figure class="screen-card">
+            <img src="./assets/demo-male-id-photo.png" alt="Blue background result" loading="lazy" />
+            <figcaption><strong>Blue</strong>US Standard</figcaption>
+          </figure>
+          <figure class="screen-card">
+            <img src="./assets/demo-male-red-bg.png" alt="Red background result" loading="lazy" />
+            <figcaption><strong>Red</strong>Immigration</figcaption>
+          </figure>
+          <figure class="screen-card">
+            <img src="./assets/demo-female-white-bg.png" alt="White background result" loading="lazy" />
+            <figcaption><strong>White</strong>Minimal</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <div class="section-head">
+        <p class="section-label">Features · 核心亮点</p>
+        <h2 class="section-title">Why US ID Photo</h2>
+        <p class="section-subtitle-en">Everything you need for a perfect headshot</p>
       </div>
+      <div class="features">
+        <article class="feature-card glass">
+          <div class="feature-icon">🚀</div>
+          <p class="en">Early Access</p>
+          <h3>抢先版内测</h3>
+          <p>首批体验用户专属，率先感受 AI 证件照生成，功能持续迭代。</p>
+        </article>
+        <article class="feature-card glass">
+          <div class="feature-icon">🧠</div>
+          <p class="en">Frontier AI</p>
+          <h3>专业 AI 大模型</h3>
+          <p>接入业界领先图像模型，保留五官特征，输出美式专业证件照。</p>
+        </article>
+        <article class="feature-card glass">
+          <div class="feature-icon">🎨</div>
+          <p class="en">Backgrounds</p>
+          <h3>多种背景可选</h3>
+          <p>蓝、红、白、黑及透明背景一键切换，满足不同场景需求。</p>
+        </article>
+        <article class="feature-card glass">
+          <div class="feature-icon">📷</div>
+          <p class="en">Capture</p>
+          <h3>自拍 &amp; 相册</h3>
+          <p>打开相机即拍，或从相册选取，两种方式随心切换。</p>
+        </article>
+        <article class="feature-card glass">
+          <div class="feature-icon">🌐</div>
+          <p class="en">Multi-Model</p>
+          <h3>国内外多模型</h3>
+          <p>通义万相、GPT Image、Gemini 等主流大模型自由切换。</p>
+        </article>
+        <article class="feature-card glass">
+          <div class="feature-icon">🎁</div>
+          <p class="en">Free Beta</p>
+          <h3>现在完全免费</h3>
+          <p>内测期间全部功能免费开放，无订阅、无隐藏付费。</p>
+        </article>
+      </div>
+
+      <!-- Models -->
+      <div class="models-strip glass">
+        <p class="section-label" style="margin-bottom:0.5rem">AI Models</p>
+        <h3 class="section-title" style="font-size:1.25rem;margin-bottom:0">Supported Models · 支持的 AI 模型</h3>
+        <div class="model-tags">
+          <span class="model-tag highlight">Wan 2.7 Pro · 万相 2.7 · Default</span>
+          <span class="model-tag">Wan 2.1 Edit · 万相 2.1</span>
+          <span class="model-tag">GPT Image 1</span>
+          <span class="model-tag">Gemini 2.0 Flash</span>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-banner glass">
+        <h2>Ready to create your headshot?</h2>
+        <p>立即下载，免费体验 AI 美式证件照生成 · Free during early access beta</p>
+        <a class="btn-download" href="./american-id-photo.apk" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download Android APK
+        </a>
+      </div>
+
+      <!-- Install -->
+      <div class="install glass">
+        <h3>安装指南</h3>
+        <p class="en">Installation Guide</p>
+        <ol class="steps">
+          <li>
+            点击下载按钮，将 APK 保存到手机
+            <span class="step-en">Tap Download and save the APK to your device</span>
+          </li>
+          <li>
+            打开文件安装；若提示「未知来源」，请在设置中允许
+            <span class="step-en">Open the file and allow installation from unknown sources if prompted</span>
+          </li>
+          <li>
+            授予相机与相册权限
+            <span class="step-en">Grant camera and photo library permissions</span>
+          </li>
+          <li>
+            拍照或选图，AI 生成后保存到相册
+            <span class="step-en">Capture or upload, generate, and save to your album</span>
+          </li>
+        </ol>
+      </div>
+
+      <footer class="footer">
+        <p class="footer-brand"><strong>US ID Photo</strong> · 美式证件照 · AI Professional Headshot Generator</p>
+        <div class="footer-links">
+          <a href="../">Web App 网页版</a>
+          <a href="./american-id-photo.apk" download>Direct APK Download</a>
+        </div>
+        <p class="disclaimer">
+          Photos generated are for reference only and do not guarantee compliance with any official requirements.<br />
+          本 App 生成照片仅供参考，不保证符合任何政府或机构的官方要求。Early access beta — features may change.
+        </p>
+      </footer>
     </div>
   </body>
 </html>
